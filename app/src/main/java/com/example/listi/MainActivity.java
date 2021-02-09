@@ -38,10 +38,10 @@ public class MainActivity extends AppCompatActivity {
         mText = getString(R.string.large_text);
 
         saveText();
-        listViewInit(this);
+        listViewInit();
         loadText();
     }
-    private void listViewInit(final Context context) {
+    private void listViewInit() {
         prepareContent();
         listContentAdapter = createAdapter();
         listView.setAdapter(listContentAdapter);
@@ -97,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onRefresh() {
                 swipeRefreshLayout.setRefreshing(false);
+                listViewInit();
                 prepareContent();
                 createAdapter();
 
