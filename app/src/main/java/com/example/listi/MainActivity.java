@@ -2,8 +2,13 @@ package com.example.listi;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -11,56 +16,92 @@ import android.widget.SimpleAdapter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String key1 = "key1";
-    private static final String key2 = "key2";
-    
+    private ListView listView;
+    private SimpleAdapter listContentAdapter = null;
+    private final List<HashMap<String, String>> list = new ArrayList<>();
+    private SharedPreferences mySharedPref;
+    private final static String TEXT_PAR = "note_text";
+    private String mText;
+    SwipeRefreshLayout swipeRefreshLayout;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ListView list = findViewById(R.id.listss);
+        listView = findViewById(R.id.listss);
         BaseAdapter listContentAdapter = createAdapter();
-        list.setAdapter(listContentAdapter);
+        listView.setAdapter(listContentAdapter);
+        mText = getString(R.string.large_text);
 
+        saveText();
+        listViewInit(this);
+        loadText();
+    }
+    private void listViewInit(final Context context) {
+        prepareContent();
+        listContentAdapter = createAdapter();
+        listView.setAdapter(listContentAdapter);
+        listView.setOnItemClickListener(new ListView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                list.remove(position);
+                listContentAdapter.notifyDataSetChanged();
 
-
-
-
-
-
-
+            }
+        });
     }
 
     @NonNull
-    private BaseAdapter createAdapter() {
+    private SimpleAdapter createAdapter() {
         int[] to = {android.R.id.text1,android.R.id.text2};
         String[] from = {"text","length"};
 
-        return new SimpleAdapter(this, prepareContent(), android.R.layout.simple_list_item_2,from,to);
+
+        return new SimpleAdapter(this, list, android.R.layout.simple_list_item_2,from,to);
     }
 
     @NonNull
-    private List<Map<String, String>> prepareContent() {
-        List<Map<String,String>> data = new ArrayList<>();
-        HashMap<String, String> map;
+    private List<HashMap<String, String>> prepareContent() {
+
+         HashMap<String, String> map;
         String[] arrayContent = getString(R.string.large_text).split("\n\n");
         for (String s : arrayContent) {
             map = new HashMap<>();
-            String a = s;
+
             map.put("text", s);
             map.put("length", s.length() + "");
-            data.add(map);
+            list.add(map);
 
-//        for (int i =0;i<arrayContent.length;i++){
-//            String a = arrayContent[i];
-//            map.put(arrayContent[i],a);
 
         }
-//        }
-        return data;
+        arrayContent = mySharedPref.getString("TEXT_PAR",mText).split("\n\n");
+
+
+        return list;
     }
+    private void saveText(){
+        mySharedPref = getSharedPreferences("MyText",MODE_PRIVATE);
+        SharedPreferences.Editor myEditor = mySharedPref.edit();
+        myEditor.putString(TEXT_PAR,mText);
+        myEditor.apply();
+
+
+    }
+    private void loadText(){
+        swipeRefreshLayout = findViewById(R.id.swipe_refresh);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                swipeRefreshLayout.setRefreshing(false);
+                prepareContent();
+                createAdapter();
+
+            }
+        });
+    }
+
     }
