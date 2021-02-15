@@ -71,7 +71,6 @@ public class MainActivity extends AppCompatActivity {
         String[] arrayContent = getString(R.string.large_text).split("\n\n");
         for (String s : arrayContent) {
             map = new HashMap<>();
-
             map.put("text", s);
             map.put("length", s.length() + "");
             list.add(map);
@@ -97,9 +96,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onRefresh() {
                 swipeRefreshLayout.setRefreshing(false);
-                listViewInit();
+                list.clear();
                 prepareContent();
-                createAdapter();
+                listContentAdapter.notifyDataSetChanged();
+
 
             }
         });
