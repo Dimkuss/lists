@@ -3,7 +3,6 @@ package com.example.listi;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -24,7 +23,8 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences mySharedPref;
     private final static String TEXT_PAR = "note_text";
     private String mText;
-    SwipeRefreshLayout swipeRefreshLayout;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private ArrayList<Integer> index =new ArrayList<>();
 
 
 
@@ -48,11 +48,26 @@ public class MainActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new ListView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                index.add(position);
                 list.remove(position);
                 listContentAdapter.notifyDataSetChanged();
 
             }
         });
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putIntegerArrayList("index",index);
+    }
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState){
+        super.onRestoreInstanceState(savedInstanceState);
+        index = savedInstanceState.getIntegerArrayList("index");
+        for (int i: index){
+            list.remove(i);
+        }
     }
 
     @NonNull
